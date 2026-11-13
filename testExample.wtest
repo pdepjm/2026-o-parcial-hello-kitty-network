@@ -1,9 +1,35 @@
-import example.pepita
+import helloKitty.*
 
-describe "group of tests for pepita" {
+describe "Red de paquetes" {
 
-  test "pepita has initial energy" {
-    assert.equals(100, pepita.energy())
+  test "los bytes urgentes de una red con varios nodos suman solo los paquetes urgentes entregados" {
+    const cola = new ColaDeSalida()
+    const compresor = new Compresor(reduccion = 50)
+    const etiquetador = new Etiquetador(etiqueta = "VLAN 10")
+    etiquetador.enlazarCon(compresor)
+    compresor.enlazarCon(cola)
+    const red = new Red(nodoEntrada = etiquetador)
+
+    red.enviar(new Paquete(encabezados = [], bytes = 100, esUrgente = true))
+    red.enviar(new Paquete(encabezados = [], bytes = 200, esUrgente = false))
+
+    assert.equals(56, red.bytesUrgentes())
   }
 
+  test "los bytes urgentes de una redcon varios nodos y un clonador suman solo los paquetes urgentes entregados" {
+    const cola1 = new ColaDeSalida()
+    const cola2 = new ColaDeSalida()
+    const etiquetador = new Etiquetador(etiqueta = "VLAN 10")
+    const compresor = new Compresor(reduccion = 50)
+    etiquetador.enlazarCon(cola1)
+    compresor.enlazarCon(cola2)
+    const clonador = new Clonador()
+    clonador.agregarEnlace(etiquetador)
+    clonador.agregarEnlace(compresor)
+    const red = new Red(nodoEntrada = clonador)
+
+    red.enviar(new Paquete(encabezados = [], bytes = 100, esUrgente = true))
+
+    assert.equals(0, red.bytesUrgentes())
+  }
 }
